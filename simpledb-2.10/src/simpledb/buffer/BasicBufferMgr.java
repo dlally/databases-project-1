@@ -2,6 +2,9 @@ package simpledb.buffer;
 
 import simpledb.file.*;
 
+import java.util.ArrayList;
+import java.util.Hashtable;
+
 /**
  * Manages the pinning and unpinning of buffers to blocks.
  * @author Edward Sciore
@@ -10,6 +13,7 @@ import simpledb.file.*;
 class BasicBufferMgr {
    private Buffer[] bufferpool;
    private int numAvailable;
+   private ArrayList<Buffer> emptyFrames;
    
    /**
     * Creates a buffer manager having the specified number 
@@ -27,8 +31,11 @@ class BasicBufferMgr {
    BasicBufferMgr(int numbuffs) {
       bufferpool = new Buffer[numbuffs];
       numAvailable = numbuffs;
-      for (int i=0; i<numbuffs; i++)
-         bufferpool[i] = new Buffer();
+      emptyFrames = new ArrayList<Buffer>(numbuffs);
+      for (int i=0; i<numbuffs; i++) {
+          bufferpool[i] = new Buffer();
+          emptyFrames.add(bufferpool[i]);
+      }
    }
    
    /**
@@ -61,6 +68,11 @@ class BasicBufferMgr {
       if (!buff.isPinned())
          numAvailable--;
       buff.pin();
+
+      if(emptyFrames.contains(buff)) {
+          emptyFrames.remove(buff);
+      }
+
       return buff;
    }
    
@@ -80,6 +92,11 @@ class BasicBufferMgr {
       buff.assignToNew(filename, fmtr);
       numAvailable--;
       buff.pin();
+
+      if(emptyFrames.contains(buff)) {
+          emptyFrames.remove(buff);
+      }
+
       return buff;
    }
    
@@ -89,8 +106,12 @@ class BasicBufferMgr {
     */
    synchronized void unpin(Buffer buff) {
       buff.unpin();
-      if (!buff.isPinned())
-         numAvailable++;
+      if (!buff.isPinned()) {
+          numAvailable++;
+          if(!emptyFrames.contains(buff)) {
+              emptyFrames.add(buff);
+          }
+      }
    }
    
    /**
@@ -111,9 +132,14 @@ class BasicBufferMgr {
    }
    
    private Buffer chooseUnpinnedBuffer() {
-      for (Buffer buff : bufferpool)
+
+      if(!emptyFrames.isEmpty()) {
+          return emptyFrames.get(0);
+      }
+      return null;
+/*      for (Buffer buff : bufferpool)
          if (!buff.isPinned())
          return buff;
-      return null;
+      return null;*/
    }
 }
