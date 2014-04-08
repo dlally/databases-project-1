@@ -3,19 +3,24 @@ package simpledb.buffer;
 import simpledb.file.*;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
 
 /**
+ * CS4432-Project1:
+ * @author Nathaniel Miller
+ * =================================================
  * Manages the pinning and unpinning of buffers to blocks.
  * @author Edward Sciore
  *
  */
 class BasicBufferMgr {
    private Buffer[] bufferpool;
-   private int numAvailable;
-   private ArrayList<Buffer> emptyFrames;
+   private ArrayList<Buffer> freeFrames;
    
    /**
+    * CS4432-Project1:
+    * Modified this constructor to initialize the list of
+    * free frames.
+    * =================================================
     * Creates a buffer manager having the specified number 
     * of buffer slots.
     * This constructor depends on both the {@link FileMgr} and
@@ -30,11 +35,10 @@ class BasicBufferMgr {
     */
    BasicBufferMgr(int numbuffs) {
       bufferpool = new Buffer[numbuffs];
-      numAvailable = numbuffs;
-      emptyFrames = new ArrayList<Buffer>(numbuffs);
+      freeFrames = new ArrayList<Buffer>(numbuffs);
       for (int i=0; i<numbuffs; i++) {
           bufferpool[i] = new Buffer();
-          emptyFrames.add(bufferpool[i]);
+          freeFrames.add(bufferpool[i]);
       }
    }
    
@@ -47,8 +51,15 @@ class BasicBufferMgr {
          if (buff.isModifiedBy(txnum))
          buff.flush();
    }
-   
+
+
    /**
+    * CS4432-Project1:
+    * Modified this function to properly update the
+    * list of free frames when a page is pinned.
+    * Once a page is pinned the buffer is removed from
+    * the free frames list.
+    * =================================================
     * Pins a buffer to the specified block. 
     * If there is already a buffer assigned to that block
     * then that buffer is used;  
@@ -65,18 +76,23 @@ class BasicBufferMgr {
             return null;
          buff.assignToBlock(blk);
       }
-      if (!buff.isPinned())
-         numAvailable--;
       buff.pin();
 
-      if(emptyFrames.contains(buff)) {
-          emptyFrames.remove(buff);
+      // Remove the pinned frame from the free frames list
+      if(freeFrames.contains(buff)) {
+          freeFrames.remove(buff);
       }
 
       return buff;
    }
    
    /**
+    * CS4432-Project1:
+    * Modified this function to properly update the
+    * list of free frames when a page is pinned.
+    * Once a page is pinned the buffer is removed from
+    * the free frames list.
+    * =================================================
     * Allocates a new block in the specified file, and
     * pins a buffer to it. 
     * Returns null (without allocating the block) if 
@@ -90,26 +106,33 @@ class BasicBufferMgr {
       if (buff == null)
          return null;
       buff.assignToNew(filename, fmtr);
-      numAvailable--;
       buff.pin();
 
-      if(emptyFrames.contains(buff)) {
-          emptyFrames.remove(buff);
+      // Remove the pinned frame from the free frames list
+      if(freeFrames.contains(buff)) {
+          freeFrames.remove(buff);
       }
 
       return buff;
    }
    
    /**
+    * CS4432-Project1:
+    * Modified this function to properly update
+    * the list of free frames when a frame is unpinned.
+    * An unpinned frame is free to be used and is therefore
+    * added to the list of free frames.
+    * =================================================
     * Unpins the specified buffer.
     * @param buff the buffer to be unpinned
     */
    synchronized void unpin(Buffer buff) {
       buff.unpin();
       if (!buff.isPinned()) {
-          numAvailable++;
-          if(!emptyFrames.contains(buff)) {
-              emptyFrames.add(buff);
+
+          // Add the unpinned frame from the free frames list
+          if(!freeFrames.contains(buff)) {
+              freeFrames.add(buff);
           }
       }
    }
@@ -119,7 +142,7 @@ class BasicBufferMgr {
     * @return the number of available buffers
     */
    int available() {
-      return numAvailable;
+      return freeFrames.size();
    }
    
    private Buffer findExistingBuffer(Block blk) {
@@ -130,11 +153,20 @@ class BasicBufferMgr {
       }
       return null;
    }
-   
+
+
+   /**
+    * CS4432-Project1:
+    * Modified this function to utilize the list of
+    * free frames instead of the inefficient pool scan method.
+    * The first buffer element in the free frames list is returned
+    * if the list is non-empty.
+    * =================================================
+    */
    private Buffer chooseUnpinnedBuffer() {
 
-      if(!emptyFrames.isEmpty()) {
-          return emptyFrames.get(0);
+      if(!freeFrames.isEmpty()) {
+          return freeFrames.get(0);
       }
       return null;
 /*      for (Buffer buff : bufferpool)
