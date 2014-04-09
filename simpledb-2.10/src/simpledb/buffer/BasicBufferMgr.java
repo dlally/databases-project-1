@@ -235,6 +235,35 @@ class BasicBufferMgr {
         }
     }
 
+    /** CS4432-Project1: Get an array of dirty buffers in this manager
+     * Dirty buffers will be written back to disk before being replaced
+     *
+     * @return Array of dirty buffers.
+     */
+    Buffer[] dirtyBuffers(){
+        ArrayList<Buffer> dirtyBuffs = new ArrayList<Buffer>();
+        for(Buffer b : bufferpool){
+            if(b.isDirty()){
+                dirtyBuffs.add(b);
+            }
+        }
+        return dirtyBuffs.toArray(new Buffer[0]);
+    }
+
+    /** CS4432-Project1: Get an array of pinned buffers
+     *
+     * @return Array of pinned buffers
+     */
+    Buffer[] pinnedBuffers(){
+        ArrayList<Buffer> pinnedBuffs = new ArrayList<Buffer>();
+        for(Buffer b : bufferpool){
+            if(b.isPinned()){
+                pinnedBuffs.add(b);
+            }
+        }
+        return pinnedBuffs.toArray(new Buffer[0]);
+    }
+
     /**
      * CS4432-Project1: Custom toString method to provide details about this buffermgr
      * @return String representation of this BasicBufferMgr
