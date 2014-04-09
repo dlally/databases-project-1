@@ -17,6 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  */
 class BasicBufferMgr {
+    private static final int maxClockCycles = 10; // Maximum number of full rotations the clock pointer will make before giving up
     private Buffer[] bufferpool;
     private ArrayList<Buffer> freeFrames;
     private ConcurrentHashMap<Block, Buffer> blocksToBuffers;
@@ -215,7 +216,7 @@ class BasicBufferMgr {
      * @return a free buffer to use
      */
     private Buffer chooseClock(){
-        for(int i = 0; i < bufferpool.length * 10; i++){
+        for(int i = 0; i < bufferpool.length * maxClockCycles; i++){
             // Reset the frame pointer to the beginning if needed
             if(framePtr == bufferpool.length){
                 framePtr = 0;
