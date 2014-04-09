@@ -226,6 +226,7 @@ public class Buffer {
     }
 
     /**
+     * CS4432-Project1: Allow this buffer a second chance
      * Initializes the buffer's page according to the specified formatter,
      * and appends the page to the specified file.
      * If the buffer was dirty, then the contents
@@ -280,5 +281,9 @@ public class Buffer {
                 ", lastAccessTime=" + lastAccessTime +
                 ", refBit=" + refBit +
                 "}\n";
+    }
+
+    public int getID() {
+        return ID;
     }
 }

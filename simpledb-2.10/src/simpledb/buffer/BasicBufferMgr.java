@@ -21,7 +21,7 @@ class BasicBufferMgr {
     private Buffer[] bufferpool;
     private ArrayList<Buffer> freeFrames;
     private ConcurrentHashMap<Block, Buffer> blocksToBuffers;
-    private final BufferReplacementPolicy replacementPolicy = BufferReplacementPolicy.CLOCK; // Specifies replacement policy
+    private final BufferReplacementPolicy replacementPolicy = BufferReplacementPolicy.LRU; // Specifies replacement policy
     private int framePtr; // clock replacement policy frame pointer
 
     /**
@@ -128,7 +128,7 @@ class BasicBufferMgr {
         if(freeFrames.contains(buff)) {
             freeFrames.remove(buff);
         }
-        System.out.println("===New buffer assigned!===\nBuffer Manager State:\n" + toString());
+        //System.out.println("===New buffer assigned!===\nBuffer Manager State:\n" + toString());
 
 
         return buff;
@@ -180,15 +180,18 @@ class BasicBufferMgr {
      * Returns a frame based on the selected replacement policy
      */
     private synchronized Buffer chooseUnpinnedBuffer() {
+        Buffer b = null;
         if(replacementPolicy.equals(BufferReplacementPolicy.LRU)){
-            return chooseLRU();
+            b = chooseLRU();
         }
         else if(replacementPolicy.equals(BufferReplacementPolicy.CLOCK)){
-            return chooseClock();
+            b = chooseClock();
         }
-        else{
-            return null;
+        if(b != null){
+            b.setSecondChance(true);
+            System.out.println("Based on replacement policy " + replacementPolicy + " buffer ID " + b.getID() + " was selected");
         }
+        return b;
     }
 
     /**
@@ -198,12 +201,18 @@ class BasicBufferMgr {
      */
     private Buffer chooseLRU(){
         Buffer oldest = null;
-        for(Buffer b : freeFrames){
-            if(oldest == null){
-                oldest = b;
-            }
-            if(oldest.getLastAccessTime() > b.getLastAccessTime()){
-                oldest = b;
+        for(Buffer b : bufferpool){
+            if(!b.isPinned()){
+                // Special case if we haven't found an unpinned buffer yet
+                if(oldest == null){
+                    System.out.println("Oldest bufferID found so far: " + b.getID());
+                    oldest = b;
+                }
+                // Compare access time, replace if needed
+                else if(oldest.getLastAccessTime() > b.getLastAccessTime()){
+                    System.out.println("Oldest bufferID found so far: " + b.getID());
+                    oldest = b;
+                }
             }
         }
         return oldest;
@@ -224,6 +233,7 @@ class BasicBufferMgr {
             Buffer b = bufferpool[framePtr];
             if(!b.isPinned() && b.hasSecondChance()) {
                 // frame has second chance so skip
+                System.out.println("BufferID " + b.getID() + " had a second chance");
                 b.setSecondChance(false);
             }
             else if(!b.isPinned() && !b.hasSecondChance()) {
@@ -235,6 +245,7 @@ class BasicBufferMgr {
 
 
         }
+        System.err.println("All buffers were pinned, unable to select replacement");
         return null;
     }
 
