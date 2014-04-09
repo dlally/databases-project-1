@@ -242,8 +242,6 @@ class BasicBufferMgr {
                 return b;
             }
             framePtr++;
-
-
         }
         System.err.println("All buffers were pinned, unable to select replacement");
         return null;

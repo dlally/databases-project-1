@@ -5,13 +5,18 @@ import simpledb.remote.SimpleDriver;
 import javax.xml.transform.Result;
 
 /**
- * Class TestDB is a test program for exercising the creation of,
+ * Class TestDBProgram is a test program for exercising the creation of,
  * population of, and querying of tables using SimpleDB.
  *
  * @author Nathaniel Miller
- * @version 4/8/2014
+ * @author Douglas Lally
  */
-public class TestDB {
+public class TestDBProgram {
+    /**
+     * Test program main method in which the test program
+     * executes.
+     * @param args arguments
+     */
     public static void main(String[] args) {
         Connection conn = null;
         try {

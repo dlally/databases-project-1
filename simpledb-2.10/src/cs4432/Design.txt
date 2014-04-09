@@ -1,0 +1,70 @@
+Douglas Lally - dlally@wpi.edu
+Nathaniel Miller - nwmiller@wpi.edu
+CS4432 - Project 1
+-----------------------------------
+The following classes were modified for Project 1:
+src/simpledb/buffer/BasicBufferMgr
+src/simpledb/buffer/Buffer
+src/simpledb/buffer/BufferMgr
+
+The following classes were created for Project 1:
+src/simpledb/buffer/BufferReplacementPolicy
+src/cs4432/TestDBProgram
+-----------------------------------
+Below we outline the modifications and design decisions for each project task:
+
+Task 2.1:
+The original implementation of free frame finding was inefficient and required
+the entire buffer pool to be scanned. Our modified implementation in the BasicBufferMgr class
+instead leverages a list of free frames. We created an ArrayList data structure to store the
+list of free frames, which is updated as buffers are pinned/unpinned. When searching for a free
+buffer, the first element in the ArrayList of free frames is returned as long as the list is non-empty.
+This retrieval can be done in constant time and greatly increase the efficiency.
+
+Task 2.2:
+Our modified disk block search in the BasicBufferMgr utilizes a HashMap data structure to enable the
+efficient lookup of a given disk block. In the HashMap the disk block is the key
+and the associated Buffer in the pool is the value.
+
+Task 2.3:
+
+To implement the replacement policies we modified both the BasicBufferMgr and the Buffer classes.
+
+LRU Policy:
+We altered the Buffer class to contain a last access time variable to serve as a timestamp
+for the replacement policy. Operations on a Buffer object update the last access time according.
+Our implementation of the policy in the BasicBufferMgr follows the policy algorithm
+and returns the least recently used buffer based on the last access time of each buffer in the
+buffer pool.
+
+Clock Policy:
+We modified the Buffer class to maintain a ref bit variable (second chance bit) for the clock replacement
+policy. We used a boolean variable to serve as a bit (0 or 1) construct. In the BasicBufferMgr we added
+a frame pointer variable to serve as the clock pointer for the policy algorithm. The implementation of the
+policy checks the pin count and ref bit of each buffer in the buffer pool to determine
+eviction candidacy. We chose to limit the amount of times the clock pointer will move to 10 times the length
+of the buffer pool. If no free buffer is found by that many iterations then no buffer is returned.
+
+Task 2.4:
+The Buffer class already maintained the pin counter and dirty metadata via the pins
+and modifiedBy variables. We added two methods to the BasicBufferMgr to generate an
+array of this metadata for the entire buffer pool. One method will return an array specifying
+the pinned status of each buffer in the pool, and the other will do the same for the dirty status.
+
+Task 2.5:
+We implemented toString() methods in the BasicBufferMgr, Buffer, and BufferMgr classes are
+required by the task. These methods print out the relevant contents of an Object of that type.
+
+Task 2.6:
+We created a test program called TestDBProgram in a new cs4432 package in the src tree.
+This program was created to test the basic simpledb functionality including our modifications.
+The program exercises the creation and population of two tables. In addition, it includes some
+basic querying of records, and finally the deletion of records from the tables.
+By leveraging information printed by the BasicBufferMgr and Buffer classes, this program
+will in the background output data showing how the replacement policies are operating.
+
+Task 2.7:
+We document the code and added comments to all modified functions/classes using
+the required formatting.
+
+

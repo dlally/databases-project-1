@@ -1,0 +1,132 @@
+Douglas Lally - dlally@wpi.edu
+Nathaniel Miller - nwmiller@wpi.edu
+CS4432 - Project 1
+-----------------------------------
+
+For our testing we chose to focus on two main test cases/scenarios:
+1. Using the LRU replacement policy.
+2. Using the Clock replacement policy.
+
+We utilized the same test program while changing the replacement policy enabled
+in order to test the correctness of the replacement policy implementations for
+Task 2.6. In addition, our test programs correct execution serves to test the
+existing functionality of simpledb and our modifications for Task 2.1 and 2.2.
+
+Our test program TestDBProgram is located in /src/cs4432/ of the src tree and
+exercises some basic interactions with the DBMS. Namely, we create test tables.
+Then we populate the tables with test data. Then we execute some test queries and
+print out the result sets to determine proper operation of the DBMS functionality.
+Finally, we clean up the tables by deleting the records for future test runs.
+
+We utilize the toString() implementations we created for Task 2.5 inside BasicBufferMgr
+and Buffer classes in order to print out relevant information for testing purposes.
+This output, which is printed in the simpledb Startup program console shows how the
+replacement policies are operating in order to validate correctness.
+
+By examining this output we were able to verify the correct operation of our replacement
+policy implementations.
+-----------------------------------
+Test Scenario Output:
+The following outputs are truncated sections as the output was extensive
+and is not all necessary for demonstration.
+
+LRU policy enabled:
+<output truncated>
+Oldest bufferID found so far: 0
+Oldest bufferID found so far: 1
+Oldest bufferID found so far: 4
+Oldest bufferID found so far: 5
+Based on replacement policy LRU buffer ID 5 was selected
+Oldest bufferID found so far: 0
+Oldest bufferID found so far: 1
+Oldest bufferID found so far: 4
+Oldest bufferID found so far: 7
+Based on replacement policy LRU buffer ID 7 was selected
+Oldest bufferID found so far: 0
+Oldest bufferID found so far: 1
+Oldest bufferID found so far: 4
+Based on replacement policy LRU buffer ID 4 was selected
+Oldest bufferID found so far: 0
+Oldest bufferID found so far: 1
+Based on replacement policy LRU buffer ID 1 was selected
+Oldest bufferID found so far: 0
+Oldest bufferID found so far: 2
+Oldest bufferID found so far: 6
+Based on replacement policy LRU buffer ID 6 was selected
+Oldest bufferID found so far: 0
+Oldest bufferID found so far: 2
+Based on replacement policy LRU buffer ID 2 was selected
+Oldest bufferID found so far: 0
+Oldest bufferID found so far: 3
+Based on replacement policy LRU buffer ID 3 was selected
+Oldest bufferID found so far: 0
+Based on replacement policy LRU buffer ID 0 was selected
+Oldest bufferID found so far: 0
+Oldest bufferID found so far: 1
+Oldest bufferID found so far: 4
+Oldest bufferID found so far: 5
+Based on replacement policy LRU buffer ID 5 was selected
+Oldest bufferID found so far: 0
+Oldest bufferID found so far: 1
+Oldest bufferID found so far: 4
+Oldest bufferID found so far: 7
+Based on replacement policy LRU buffer ID 7 was selected
+<output truncated>
+
+The above output demonstrates the LRU replacement policy operation.
+As each buffer in the buffer pool is scanned the last access time of
+the buffer is looked at. If it is the oldest time seen thus far it is stored.
+Once the oldest time is found (i.e. least recently used buffer) that buffer
+is selected for eviction and replacement.
+
+
+Clock policy enabled:
+<output truncated>
+BufferID 0 had a second chance
+Based on replacement policy CLOCK buffer ID 1 was selected
+BufferID 2 had a second chance
+BufferID 3 had a second chance
+BufferID 4 had a second chance
+BufferID 5 had a second chance
+Based on replacement policy CLOCK buffer ID 6 was selected
+Based on replacement policy CLOCK buffer ID 7 was selected
+Based on replacement policy CLOCK buffer ID 0 was selected
+BufferID 1 had a second chance
+Based on replacement policy CLOCK buffer ID 2 was selected
+Based on replacement policy CLOCK buffer ID 3 was selected
+Based on replacement policy CLOCK buffer ID 4 was selected
+Based on replacement policy CLOCK buffer ID 5 was selected
+BufferID 6 had a second chance
+BufferID 7 had a second chance
+BufferID 0 had a second chance
+Based on replacement policy CLOCK buffer ID 1 was selected
+BufferID 2 had a second chance
+BufferID 3 had a second chance
+BufferID 4 had a second chance
+BufferID 5 had a second chance
+Based on replacement policy CLOCK buffer ID 6 was selected
+Based on replacement policy CLOCK buffer ID 7 was selected
+Based on replacement policy CLOCK buffer ID 0 was selected
+BufferID 1 had a second chance
+Based on replacement policy CLOCK buffer ID 2 was selected
+Based on replacement policy CLOCK buffer ID 3 was selected
+Based on replacement policy CLOCK buffer ID 4 was selected
+Based on replacement policy CLOCK buffer ID 5 was selected
+BufferID 6 had a second chance
+BufferID 7 had a second chance
+BufferID 0 had a second chance
+Based on replacement policy CLOCK buffer ID 1 was selected
+BufferID 2 had a second chance
+BufferID 3 had a second chance
+BufferID 4 had a second chance
+BufferID 5 had a second chance
+Based on replacement policy CLOCK buffer ID 6 was selected
+Based on replacement policy CLOCK buffer ID 7 was selected
+Based on replacement policy CLOCK buffer ID 0 was selected
+<output truncated>
+
+The above output demonstrates the clock replacement policy operation.
+Each buffers pin count and second chance bit are looked at to determine
+if the buffer is okay to be evicted and replaced. The output seen above
+shows the policy in action and outlines when buffers are given a second
+chance and when a buffer is selected for eviction.
