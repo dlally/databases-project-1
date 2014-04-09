@@ -1,6 +1,7 @@
 package simpledb.buffer;
 
-import simpledb.file.*;
+import simpledb.file.Block;
+import simpledb.file.FileMgr;
 
 /**
  * The publicly-accessible buffer manager.
@@ -121,4 +122,15 @@ public class BufferMgr {
    private boolean waitingTooLong(long starttime) {
       return System.currentTimeMillis() - starttime > MAX_TIME;
    }
+
+    /**
+     * CS4432-Project1: Custom toString method to provide details about this buffermgr
+     * @return String representation of this buffer manager
+     */
+    @Override
+    public String toString() {
+        return "BufferMgr{" +
+                "wrappedBufferMgr=" + bufferMgr +
+                '}';
+    }
 }

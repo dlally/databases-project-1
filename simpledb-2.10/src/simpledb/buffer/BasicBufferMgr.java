@@ -4,6 +4,7 @@ import simpledb.file.Block;
 import simpledb.file.FileMgr;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -46,7 +47,7 @@ class BasicBufferMgr {
         blocksToBuffers = new ConcurrentHashMap<Block, Buffer>();
         framePtr = 0;
         for (int i=0; i<numbuffs; i++) {
-            bufferpool[i] = new Buffer();
+            bufferpool[i] = new Buffer(i);
             freeFrames.add(bufferpool[i]);
         }
 
@@ -148,13 +149,7 @@ class BasicBufferMgr {
                 freeFrames.add(buff);
             }
             // Remove the block associated with this frame
-            for(Block b : blocksToBuffers.keySet()){
-                if(blocksToBuffers.get(b).equals(buff)){
-                    blocksToBuffers.remove(b);
-                    // There will only be one buffer for each block, no need to keep searching
-                    break;
-                }
-            }
+            blocksToBuffers.remove(buff.block());
         }
     }
 
@@ -181,7 +176,7 @@ class BasicBufferMgr {
      * CS4432-Project1:
      * Returns a frame based on the selected replacement policy
      */
-    private Buffer chooseUnpinnedBuffer() {
+    private synchronized Buffer chooseUnpinnedBuffer() {
         if(replacementPolicy.equals(BufferReplacementPolicy.LRU)){
             return chooseLRU();
         }
@@ -238,5 +233,22 @@ class BasicBufferMgr {
                 framePtr++;
             }
         }
+    }
+
+    /**
+     * CS4432-Project1: Custom toString method to provide details about this buffermgr
+     * @return String representation of this BasicBufferMgr
+     */
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("BasicBufferMgr{");
+        sb.append("bufferpool=").append(Arrays.toString(bufferpool));
+        sb.append(", freeFrames=").append(Arrays.toString(freeFrames.toArray()));
+        sb.append(", replacementPolicy=").append(replacementPolicy);
+        if(replacementPolicy.equals(BufferReplacementPolicy.CLOCK)) {
+            sb.append(", framePtr=").append(framePtr);
+        }
+        sb.append('}');
+        return sb.toString();
     }
 }

@@ -17,14 +17,20 @@ import simpledb.server.SimpleDB;
 public class Buffer {
     private Page contents = new Page();
     private Block blk = null;
+    private int ID;
     private int pins = 0;
     private int modifiedBy = -1;  // negative means not modified
     private int logSequenceNumber = -1; // negative means no corresponding log record
+
+
+
     private long lastAccessTime = 0; // The last time the Buffer was accessed
     private boolean refBit = true; // Second chance bit for clock replacement policy
 
     /**
      * CS4432-Project1: Initialize the last access time to the time this buffer was created
+     * Assign an ID number to this buffer. This ID is just used for identification purposes,
+     * it is not required for buffer functionality
      *
      * Creates a new buffer, wrapping a new
      * {@link simpledb.file.Page page}.
@@ -39,7 +45,8 @@ public class Buffer {
      * {@link simpledb.server.SimpleDB#initFileAndLogMgr(String)} or
      * is called first.
      */
-    public Buffer() {
+    public Buffer(int ID) {
+        this.ID = ID;
         lastAccessTime = System.nanoTime();
     }
 
@@ -135,7 +142,8 @@ public class Buffer {
     }
 
     /**
-     * CS4432-Project1: Update the last access time for this buffer
+     * CS4432-Project1: Update the last access time for this buffer,
+     * only write to disk if this block is dirty
      *
      * Writes the page to its disk block if the
      * page is dirty.
@@ -145,7 +153,7 @@ public class Buffer {
      */
     void flush() {
         lastAccessTime = System.nanoTime();
-        if (modifiedBy >= 0) {
+        if (isDirty()) {
             SimpleDB.logMgr().flush(logSequenceNumber);
             contents.write(blk);
             modifiedBy = -1;
@@ -250,5 +258,23 @@ public class Buffer {
      */
     public void setSecondChance(boolean refBit) {
         this.refBit = refBit;
+    }
+
+    /**
+     * CS4432-Project1: Custom toString method to provide details about this buffer.
+     * @return String representation of this buffer
+     */
+    @Override
+    public String toString() {
+        return "Buffer{" +
+                "ID=" + ID +
+                ", contents=" + contents +
+                ", blk=" + blk +
+                ", pins=" + pins +
+                ", modifiedBy=" + modifiedBy +
+                ", logSequenceNumber=" + logSequenceNumber +
+                ", lastAccessTime=" + lastAccessTime +
+                ", refBit=" + refBit +
+                '}';
     }
 }
