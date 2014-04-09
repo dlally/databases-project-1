@@ -31,6 +31,7 @@ SELECT VName, VCapacity, VMaxSpeed FROM Vehicles WHERE VMaxSpeed = 70
 
 
 -- The following is output from those queries
+/*
 Table Maps created.
 Table Vehicles created.
 Map records inserted into table Maps.
@@ -48,7 +49,7 @@ Map #9: Rouge Transmission supports 64 players.
 Table Vehicles Example Query Results:
 
 Vehicle LAV-25 carries 8 players at a top speed of 70 km/h."
-
+*/
 -- Then the records in the tables are deleted from the tables to ensure
 -- of records works and to clean up the tables for subsequent program
 -- executions

@@ -61,7 +61,7 @@ This program was created to test the basic simpledb functionality including our 
 The program exercises the creation and population of two tables. In addition, it includes some
 basic querying of records, and finally the deletion of records from the tables.
 By leveraging information printed by the BasicBufferMgr and Buffer classes, this program
-will in the background output data showing how the replacement policies are operating.
+will cause the server to print out data data showing how the replacement policies are operating.
 
 Task 2.7:
 We document the code and added comments to all modified functions/classes using
