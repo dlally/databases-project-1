@@ -21,6 +21,7 @@ public class Buffer {
     private int modifiedBy = -1;  // negative means not modified
     private int logSequenceNumber = -1; // negative means no corresponding log record
     private long lastAccessTime = 0; // The last time the Buffer was accessed
+    private boolean refBit = true; // Second chance bit for clock replacement policy
 
     /**
      * CS4432-Project1: Initialize the last access time to the time this buffer was created
@@ -233,5 +234,21 @@ public class Buffer {
      */
     public long getLastAccessTime(){
         return lastAccessTime;
+    }
+
+    /**
+     * CS4432-Project1: Returns the ref (second chance) bit of a buffer,
+     * which is used by the clock replacement policy.
+     */
+    public boolean hasSecondChance() {
+        return refBit;
+    }
+
+    /**
+     * CS4432-Project1: Sets the ref (second chance) but of a buffer.
+     * @param refBit the second chance bit
+     */
+    public void setSecondChance(boolean refBit) {
+        this.refBit = refBit;
     }
 }

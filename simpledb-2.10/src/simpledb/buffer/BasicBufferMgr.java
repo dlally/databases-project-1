@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * CS4432-Project1:
  * @author Nathaniel Miller
+ * @author Douglas Lally
  * =================================================
  * Manages the pinning and unpinning of buffers to blocks.
  * @author Edward Sciore
@@ -19,7 +20,7 @@ class BasicBufferMgr {
     private ArrayList<Buffer> freeFrames;
     private ConcurrentHashMap<Block, Buffer> blocksToBuffers;
     private final BufferReplacementPolicy replacementPolicy = BufferReplacementPolicy.LRU; // Specifies replacement policy
-
+    private int framePtr; // clock replacement policy frame pointer
 
     /**
      * CS4432-Project1:
@@ -43,6 +44,7 @@ class BasicBufferMgr {
         bufferpool = new Buffer[numbuffs];
         freeFrames = new ArrayList<Buffer>(numbuffs);
         blocksToBuffers = new ConcurrentHashMap<Block, Buffer>();
+        framePtr = 0;
         for (int i=0; i<numbuffs; i++) {
             bufferpool[i] = new Buffer();
             freeFrames.add(bufferpool[i]);
@@ -178,7 +180,6 @@ class BasicBufferMgr {
     /**
      * CS4432-Project1:
      * Returns a frame based on the selected replacement policy
-     * =================================================
      */
     private Buffer chooseUnpinnedBuffer() {
         if(replacementPolicy.equals(BufferReplacementPolicy.LRU)){
@@ -187,7 +188,6 @@ class BasicBufferMgr {
         else if(replacementPolicy.equals(BufferReplacementPolicy.CLOCK)){
             return chooseClock();
         }
-
         else{
             return null;
         }
@@ -212,12 +212,31 @@ class BasicBufferMgr {
     }
 
     /**
-     * CS4432-Project1: Returns an unpinned buffer to use based on clock replacement
-     * If there are no free buffers, it returns null instead
-     * @return a free buffer to use, or null if no free buffers exist
+     * CS4432-Project1: Returns an unpinned buffer to use based on clock replacement policy.
+     * Once an candidate frame is found for eviction it is returned.
+     * @return a free buffer to use
      */
     private Buffer chooseClock(){
-        // TODO
-        return null;
+        for(int i = framePtr;;i++) {
+            Buffer b = bufferpool[i];
+            if(!b.isPinned() && b.hasSecondChance()) {
+                // frame has second chance so skip
+                b.setSecondChance(false);
+            }
+            else if(!b.isPinned() && !b.hasSecondChance()) {
+                // frame is free for use so return it
+                return b;
+            }
+
+            // Update the frame pointer
+            if(framePtr == (bufferpool.length - 1)) {
+                // reset pointer to wrap to top of clock
+                framePtr = 0;
+            }
+            else {
+                // advance clock pointer
+                framePtr++;
+            }
+        }
     }
 }
