@@ -20,7 +20,7 @@ class BasicBufferMgr {
     private Buffer[] bufferpool;
     private ArrayList<Buffer> freeFrames;
     private ConcurrentHashMap<Block, Buffer> blocksToBuffers;
-    private final BufferReplacementPolicy replacementPolicy = BufferReplacementPolicy.LRU; // Specifies replacement policy
+    private final BufferReplacementPolicy replacementPolicy = BufferReplacementPolicy.CLOCK; // Specifies replacement policy
     private int framePtr; // clock replacement policy frame pointer
 
     /**
@@ -127,6 +127,8 @@ class BasicBufferMgr {
         if(freeFrames.contains(buff)) {
             freeFrames.remove(buff);
         }
+        System.out.println("===New buffer assigned!===\nBuffer Manager State:\n" + toString());
+
 
         return buff;
     }
@@ -212,26 +214,24 @@ class BasicBufferMgr {
      * @return a free buffer to use
      */
     private Buffer chooseClock(){
-        for(int i = framePtr;;i++) {
-            Buffer b = bufferpool[i];
+        while(true){
+            // Reset the frame pointer to the beginning if needed
+            if(framePtr == bufferpool.length){
+                framePtr = 0;
+            }
+            Buffer b = bufferpool[framePtr];
             if(!b.isPinned() && b.hasSecondChance()) {
                 // frame has second chance so skip
                 b.setSecondChance(false);
             }
             else if(!b.isPinned() && !b.hasSecondChance()) {
                 // frame is free for use so return it
+                framePtr++;
                 return b;
             }
+            framePtr++;
 
-            // Update the frame pointer
-            if(framePtr == (bufferpool.length - 1)) {
-                // reset pointer to wrap to top of clock
-                framePtr = 0;
-            }
-            else {
-                // advance clock pointer
-                framePtr++;
-            }
+
         }
     }
 
@@ -271,11 +271,11 @@ class BasicBufferMgr {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("BasicBufferMgr{");
-        sb.append("bufferpool=").append(Arrays.toString(bufferpool));
-        sb.append(", freeFrames=").append(Arrays.toString(freeFrames.toArray()));
+        sb.append("bufferpool=\n").append(Arrays.toString(bufferpool)).append('\n');
+        sb.append(", freeFrames=\n").append(Arrays.toString(freeFrames.toArray())).append('\n');
         sb.append(", replacementPolicy=").append(replacementPolicy);
         if(replacementPolicy.equals(BufferReplacementPolicy.CLOCK)) {
-            sb.append(", framePtr=").append(framePtr);
+            sb.append(",\nframePtr=").append(framePtr);
         }
         sb.append('}');
         return sb.toString();

@@ -102,6 +102,7 @@ public class Buffer {
         if (lsn >= 0)
             logSequenceNumber = lsn;
         contents.setInt(offset, val);
+        System.out.println("===Buffer " + ID + " Modified===");
     }
 
     /**
@@ -126,6 +127,7 @@ public class Buffer {
         if (lsn >= 0)
             logSequenceNumber = lsn;
         contents.setString(offset, val);
+        System.out.println("===Buffer " + ID + " Modified===");
     }
 
     /**
@@ -168,6 +170,7 @@ public class Buffer {
     void pin() {
         lastAccessTime = System.nanoTime();
         pins++;
+        //System.out.println("===Buffer " + ID + " Pinned===");
     }
 
     /**
@@ -178,6 +181,7 @@ public class Buffer {
     void unpin() {
         lastAccessTime = System.nanoTime();
         pins--;
+        //System.out.println("===Buffer " + ID + " Unpinned===");
     }
 
     /**
@@ -275,6 +279,6 @@ public class Buffer {
                 ", logSequenceNumber=" + logSequenceNumber +
                 ", lastAccessTime=" + lastAccessTime +
                 ", refBit=" + refBit +
-                '}';
+                "}\n";
     }
 }
