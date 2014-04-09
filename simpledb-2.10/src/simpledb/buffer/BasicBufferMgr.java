@@ -211,10 +211,11 @@ class BasicBufferMgr {
     /**
      * CS4432-Project1: Returns an unpinned buffer to use based on clock replacement policy.
      * Once an candidate frame is found for eviction it is returned.
+     * If no frame can be found within 10 clock cycles, null is returned instead
      * @return a free buffer to use
      */
     private Buffer chooseClock(){
-        while(true){
+        for(int i = 0; i < bufferpool.length * 10; i++){
             // Reset the frame pointer to the beginning if needed
             if(framePtr == bufferpool.length){
                 framePtr = 0;
@@ -233,6 +234,7 @@ class BasicBufferMgr {
 
 
         }
+        return null;
     }
 
     /** CS4432-Project1: Get an array of dirty buffers in this manager
